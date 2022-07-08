@@ -1,17 +1,33 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import "./css/index.css"
+import MapView from "./MapView";
+import AnalisiView from "./AnalisiView";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+   <Menu/>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+function Menu(){
+
+
+    const map = <MapView/>
+    const analisi = <AnalisiView/>
+    const [view, setView] = useState(map);
+
+ return(
+     <div>
+         <div className={"menu"}>
+              <div className={"menu-inner"}>
+                    <input type={"button"} value={"Mappa"} className={"menu-button"} onClick={()=>setView(map)}/>
+                    <input type={"button"} value={"Analisi"} className={"menu-button"} onClick={()=>setView(analisi)}/>
+              </div>
+         </div>
+         <div className={"mainView"}>
+             {view}
+         </div>
+     </div>)
+}
