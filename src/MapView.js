@@ -7,11 +7,23 @@ import ReactLoading from "react-loading";
 import Select from "react-select";
 
 
+let width = 960,
+    rotated = 90,
+    height = 500;
+
 export default function MapView(props){
     const [loaded, setLoaded] = useState(false)
 
     const [geographies, setGeographies] = useState([])
     const [datas, setDatas] = useState([])
+
+    const [mouse_up, set_mouse_up] = useState(undefined) //max 370
+    const [mouse_down, set_mouse_down] = useState(undefined)
+
+    const [movement_x, setMovement_x] = useState(0)
+
+//    const [center, setCenter] = useState({clientX:0, clientY:0})
+    const [center, setCenter] = useState(0)
 
     function setSelect(e, setFunc){
         let tmp = []
@@ -83,15 +95,20 @@ export default function MapView(props){
     useEffect(multiHistPlot, [triggerHist,year, selectedCountry, histDataSource, selectHistoptions])
 
 
-    let width = 962,
-        rotated = 90,
-        height = 502;
 
 
-    let projection = d3g.geoMercator().scale(153)
-        .translate([width/2,height/1.5])
-        .rotate([rotated,0,0]);
 
+
+    function handleZoomMap(e){
+        console.log(e)
+    }
+
+
+
+    let projection = d3g.geoMercator()
+//        .translate([width/2,height/1.5])
+        .translate([height/1.5,height/1.5])
+        .rotate([center,0])
 
 
 
@@ -107,12 +124,13 @@ export default function MapView(props){
                         min={2015}
                         max={2019}
                         onChange={(e)=>setYear(e.target.value)}
+
                     />
                 </div>
 
             </div>
-            <div className={"map"}>
-                <svg className={"svg"} width={ "100%" } height={ "100%" } viewBox="0 0 800 450">
+            <div className={"map"} >
+                <svg onClick={(e)=>setCenter(e)} onWheel={handleZoomMap} onMouseUp={(e)=>set_mouse_up(e)} onMouseDown={(e)=>set_mouse_down(e)} className={"map-svg"} width={ "100%" } height={ "100%" } viewBox="0 0 800 450"  >
                     <g className="countries">
                         {geographies.map((d,i) => {
                             let happyrank = d.properties.data===undefined? null : (d.properties.data[year]===undefined? null : d.properties.data[year]["Happiness Score"]*10)
@@ -134,6 +152,16 @@ export default function MapView(props){
                         })}
                     </g>
                 </svg>
+                <div>
+                    <Slider
+                        aria-label="Anni"
+                        defaultValue={0}
+                        min={-width/4}
+                        max={width/4}
+                        onChange={(e)=>setCenter(-e.target.value)}
+
+                    />
+                </div>
             </div>
             <div>
                 <Details/>
@@ -144,7 +172,7 @@ export default function MapView(props){
                         <input type={"button"} value={"chiudi"} onClick={() => setTriggerHist(false)}/>
                         {histDataSource==="selected"?
                             <input type={"button"} value={"Seleziona da input"} onClick={() => setHistDataSource("input")}/>
-                        :
+                            :
                             <input type={"button"} value={"Seleziona dalla mappa"} onClick={() => setHistDataSource("selected")}/>
                         }
                         <div className={"select select-attributi"}> Attributi
@@ -197,7 +225,6 @@ export default function MapView(props){
     }else{
         return(<div><ReactLoading type={"spin"}/></div>)
     }
-
 
     function showDetails(g, d){
         setTriggerDetails(true)
@@ -287,6 +314,8 @@ export default function MapView(props){
                 }
 
                 var highlight = function(d){
+                    console.log(d.target)
+
                     // first every group turns grey
                     d3.selectAll(".line")
                         .transition().duration(200)
@@ -368,15 +397,13 @@ export default function MapView(props){
                     d.push(tmp)
                 }
             }
-            console.log(d)
-            console.log(d[0])
+
             if (d.length>0 && d[0]!==undefined) {
                 domain = Object.keys(d[0].data[year]).filter(function (d) {
                     return !(d === "Year" || d === "Happiness Rank")
                 })
                 let groupData = formatterHC(d, domain, year)
-                console.log("QUA")
-                console.log(groupData)
+
                 var margin = {top: 20, right: 20, bottom: 70, left: 40},
                     width = 400 - margin.left - margin.right,
                     height = 400 - margin.top - margin.bottom;
@@ -1350,3 +1377,8 @@ const PaesiOpt = [
         "label": "Hong Kong S.A.R., China"
     }
 ]
+
+
+/*
+
+ */
